@@ -12,11 +12,14 @@
     </head>
     <body >
         <div id="app">
+            
             @include ('layouts.header')
 
             <section class="section">
                 <div class="container">
-                     <router-view></router-view>
+
+                        <router-view to="/"></router-view>
+
                 </div>
             </section>
 

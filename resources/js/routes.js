@@ -5,6 +5,10 @@ let routes = [
         path: "/",
         component: require("./views/Home.vue").default,
     },
+    {
+        path: "/city/:id",
+        component: require("./views/City.vue").default,
+    },
 ];
 
 export default new VueRouter({
