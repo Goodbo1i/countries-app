@@ -2122,6 +2122,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
+/* harmony import */ var _ModalComponent_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ModalComponent.vue */ "./resources/js/components/ModalComponent.vue");
 //
 //
 //
@@ -2169,44 +2170,39 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
-  props: ["place", "city"],
+  props: ["place"],
+  components: {
+    ModalComponent: _ModalComponent_vue__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  data: function data() {
+    return {
+      showModal: false
+    };
+  },
   methods: {
-    fetchPlaces: function fetchPlaces() {
+    deletePlace: function deletePlace(id) {
       var _this = this;
 
-      if (window.location.href == "http://127.0.0.1:8000/#/") {
-        fetch("https://akademija.teltonika.lt/countries_api/api/countries").then(function (res) {
-          return res.json();
-        }).then(function (res) {
-          _this.places = res.data;
-        })["catch"](function (err) {
-          return console.log(err);
-        });
-      } else fetch("https://akademija.teltonika.lt/countries_api/api/countries/".concat(this.place.relationships.country.data.id, "/").concat(this.city)).then(function (res) {
-        return res.json();
-      }).then(function (res) {
-        _this.places = res.data;
-      })["catch"](function (err) {
-        return console.log(err);
-      });
-    },
-    deletePlace: function deletePlace(id) {
-      var _this2 = this;
-
       if (confirm("Are You Sure?")) {
-        fetch("https://akademija.teltonika.lt/countries_api/api/countries/".concat(this.place.id).concat(this.city), {
-          method: "delete"
-        }).then(function (res) {
-          return res.json();
-        }).then(function (data) {
-          alert("Article Removed");
-          console.log(window.location.href);
+        if (this.place.type == "cities") {
+          axios["delete"]("https://akademija.teltonika.lt/countries_api/api/countries/".concat(this.place.relationships.country.data.id, "/cities/").concat(this.place.id)).then(function (data) {
+            alert("Article Removed");
 
-          _this2.fetchPlaces();
-        })["catch"](function (err) {
-          return console.log(err);
-        });
+            _this.$emit("reloadlist");
+          })["catch"](function (err) {
+            return console.log(err);
+          });
+        } else {
+          axios["delete"]("https://akademija.teltonika.lt/countries_api/api/countries/".concat(this.place.id)).then(function (data) {
+            alert("Article Removed");
+
+            _this.$emit("reloadlist");
+          })["catch"](function (err) {
+            return console.log(err);
+          });
+        }
       }
     },
     editPlace: function editPlace(country) {
@@ -2260,6 +2256,43 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -2276,7 +2309,7 @@ __webpack_require__.r(__webpack_exports__);
     CreateComponent: _components_CreateComponent_vue__WEBPACK_IMPORTED_MODULE_1__["default"]
   },
   created: function created() {
-    this.fetchCountries();
+    this.getListCities();
   },
   methods: {
     addCity: function addCity(cityForm) {
@@ -2303,20 +2336,30 @@ __webpack_require__.r(__webpack_exports__);
         console.log(err);
       });
     },
-    fetchCountries: function fetchCountries(page_url) {
+    getListCities: function getListCities(page_url) {
       var _this = this;
 
       page_url = page_url || "https://akademija.teltonika.lt/countries_api/api/countries/".concat(this.id, "/cities ");
-      fetch(page_url).then(function (res) {
-        return res.json();
-      }).then(function (res) {
-        _this.cities = res.data;
+      axios.get(page_url).then(function (res) {
+        _this.cities = res.data.data;
 
-        _this.makePagination(res.meta, res.links);
+        _this.makePagination(res.data.meta, res.data.links);
       })["catch"](function (err) {
         return console.log(err);
       });
     },
+    // fetchCities(page_url) {
+    //     page_url =
+    //         page_url ||
+    //         `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities `;
+    //     fetch(page_url)
+    //         .then((res) => res.json())
+    //         .then((res) => {
+    //             this.cities = res.data;
+    //             this.makePagination(res.meta, res.links);
+    //         })
+    //         .catch((err) => console.log(err));
+    // },
     makePagination: function makePagination(meta, links) {
       var pagination = {
         current_page: meta.current_page,
@@ -2427,30 +2470,24 @@ __webpack_require__.r(__webpack_exports__);
         phone_code: "",
         cities_link: ""
       },
-      pagination: {},
-      page_url: "https://akademija.teltonika.lt/countries_api/api/countries"
+      pagination: {}
     };
   },
   created: function created() {
-    this.fetchCountries();
-  },
-  mounted: function mounted() {
-    console.log(this.$refs.items);
-    this.$refs.create;
+    this.getList();
   },
   methods: {
-    fetchCountries: function fetchCountries(page_url) {
+    getList: function getList(page_url) {
       var _this = this;
 
-      page_url = page_url || this.page_url;
-      fetch(page_url).then(function (res) {
-        return res.json();
-      }).then(function (res) {
-        _this.countries = res.data;
+      page_url = page_url || "https://akademija.teltonika.lt/countries_api/api/countries";
+      axios.get(page_url).then(function (res) {
+        console.log(res);
+        _this.countries = res.data.data;
 
-        _this.makePagination(res.meta, res.links);
+        _this.makePagination(res.data.meta, res.data.links);
       })["catch"](function (err) {
-        return console.log(err);
+        console.log(err);
       });
     },
     makePagination: function makePagination(meta, links) {
@@ -2479,52 +2516,6 @@ __webpack_require__.r(__webpack_exports__);
           "Content-Type": "application/json"
         }
       });
-    },
-    //     fetch(
-    //         `https://akademija.teltonika.lt/countries_api/api/countries`,
-    //         {
-    //             method: "post",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({
-    //                 data: {
-    //                     attributes: {
-    //                         name: countryForm.name,
-    //                         area: countryForm.area,
-    //                         population: countryForm.population,
-    //                         phone_code: countryForm.phoneCode,
-    //                     },
-    //                 },
-    //             }),
-    //         }
-    //     )
-    //         .then((response) => {
-    //             console.log(response);
-    //         })
-    //         .catch((err) => {
-    //             console.log(err);
-    //         });
-    // },
-    deleteCountry: function deleteCountry(id) {
-      var _this2 = this;
-
-      if (confirm("Are You Sure?")) {
-        fetch("https://akademija.teltonika.lt/countries_api/api/countries/".concat(id), {
-          method: "post"
-        }).then(function (res) {
-          return res.json();
-        }).then(function (data) {
-          alert("Article Removed");
-
-          _this2.fetchCountries();
-        })["catch"](function (err) {
-          return console.log(err);
-        });
-      }
-    },
-    editCountry: function editCountry(country) {
-      this.edit;
     }
   },
   components: {
@@ -2855,6 +2846,43 @@ component.options.__file = "resources/js/components/CreateComponent.vue"
 
 /***/ }),
 
+/***/ "./resources/js/components/ModalComponent.vue":
+/*!****************************************************!*\
+  !*** ./resources/js/components/ModalComponent.vue ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ModalComponent.vue?vue&type=template&id=4b2d100a& */ "./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! !../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+var script = {}
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__["default"])(
+  script,
+  _ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__.render,
+  _ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ModalComponent.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/components/TableComponent.vue":
 /*!****************************************************!*\
   !*** ./resources/js/components/TableComponent.vue ***!
@@ -3053,6 +3081,23 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a& ***!
+  \***********************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ModalComponent_vue_vue_type_template_id_4b2d100a___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ModalComponent.vue?vue&type=template&id=4b2d100a& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a&");
+
+
+/***/ }),
+
 /***/ "./resources/js/components/TableComponent.vue?vue&type=template&id=8554570c&":
 /*!***********************************************************************************!*\
   !*** ./resources/js/components/TableComponent.vue?vue&type=template&id=8554570c& ***!
@@ -3246,6 +3291,61 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a&":
+/*!**************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/ModalComponent.vue?vue&type=template&id=4b2d100a& ***!
+  \**************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _vm._m(0)
+}
+var staticRenderFns = [
+  function () {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal is-active" }, [
+      _c("div", { staticClass: "modal-background" }),
+      _vm._v(" "),
+      _c("div", { staticClass: "modal-card" }, [
+        _c("header", { staticClass: "modal-card-head" }, [
+          _c("p", { staticClass: "modal-card-title" }, [_vm._v("Modal title")]),
+          _vm._v(" "),
+          _c("button", {
+            staticClass: "delete",
+            attrs: { "aria-label": "close" },
+          }),
+        ]),
+        _vm._v(" "),
+        _c("section", { staticClass: "modal-card-body" }),
+        _vm._v(" "),
+        _c("footer", { staticClass: "modal-card-foot" }, [
+          _c("button", { staticClass: "button is-success" }, [
+            _vm._v("Save changes"),
+          ]),
+          _vm._v(" "),
+          _c("button", { staticClass: "button" }, [_vm._v("Cancel")]),
+        ]),
+      ]),
+    ])
+  },
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/TableComponent.vue?vue&type=template&id=8554570c&":
 /*!**************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/TableComponent.vue?vue&type=template&id=8554570c& ***!
@@ -3310,7 +3410,7 @@ var render = function () {
                 attrs: { viewBox: "-5 -10 30 30" },
                 on: {
                   click: function ($event) {
-                    return _vm.editPlace(_vm.place.attributes)
+                    _vm.showModal = true
                   },
                 },
               },
@@ -3390,9 +3490,81 @@ var render = function () {
       _vm._l(_vm.cities, function (city) {
         return _c("TableComponent", {
           key: city.id,
-          attrs: { place: city, city: "cities" },
+          attrs: { place: city },
+          on: {
+            reloadlist: function ($event) {
+              return _vm.getListCities()
+            },
+          },
         })
       }),
+      _vm._v(" "),
+      _c(
+        "nav",
+        {
+          staticClass: "pagination is-centered",
+          attrs: { role: "navigation", "aria-label": "pagination" },
+        },
+        [
+          _c("ul", { staticClass: "pagination-list" }, [
+            _c("li", [
+              _c(
+                "a",
+                {
+                  staticClass: "pagination-previous",
+                  class: {
+                    "is-disabled": !_vm.pagination.prev_page_url,
+                  },
+                  attrs: { title: "This is the first page" },
+                  on: {
+                    click: function ($event) {
+                      return _vm.getListCities(_vm.pagination.prev_page_url)
+                    },
+                  },
+                },
+                [_vm._v("Previous")]
+              ),
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _c(
+                "h1",
+                {
+                  staticClass: "pagination-link",
+                  attrs: { "aria-label": "Page" },
+                },
+                [
+                  _vm._v(
+                    "\n                    Page " +
+                      _vm._s(_vm.pagination.current_page) +
+                      " of\n                    " +
+                      _vm._s(_vm.pagination.last_page) +
+                      "\n                "
+                  ),
+                ]
+              ),
+            ]),
+            _vm._v(" "),
+            _c("li", [
+              _c(
+                "a",
+                {
+                  staticClass: "pagination-next",
+                  class: {
+                    "is-disabled": !_vm.pagination.next_page_url,
+                  },
+                  on: {
+                    click: function ($event) {
+                      return _vm.getListCities(_vm.pagination.next_page_url)
+                    },
+                  },
+                },
+                [_vm._v("Next page")]
+              ),
+            ]),
+          ]),
+        ]
+      ),
     ],
     2
   )
@@ -3450,7 +3622,6 @@ var render = function () {
       _c("h3", [_vm._v("Create Country form")]),
       _vm._v(" "),
       _c("CreateComponent", {
-        ref: "create",
         attrs: { code: "Phone" },
         on: { "on-submit": _vm.addCountry },
       }),
@@ -3460,9 +3631,12 @@ var render = function () {
       _vm._l(_vm.countries, function (country) {
         return _c("TableComponent", {
           key: country.id,
-          ref: "country",
-          refInFor: true,
-          attrs: { place: country, city: "" },
+          attrs: { place: country },
+          on: {
+            reloadlist: function ($event) {
+              return _vm.getList()
+            },
+          },
         })
       }),
       _vm._v(" "),
@@ -3485,7 +3659,7 @@ var render = function () {
                   attrs: { title: "This is the first page" },
                   on: {
                     click: function ($event) {
-                      return _vm.fetchCountries(_vm.pagination.prev_page_url)
+                      return _vm.getList(_vm.pagination.prev_page_url)
                     },
                   },
                 },
@@ -3522,7 +3696,7 @@ var render = function () {
                   },
                   on: {
                     click: function ($event) {
-                      return _vm.fetchCountries(_vm.pagination.next_page_url)
+                      return _vm.getList(_vm.pagination.next_page_url)
                     },
                   },
                 },

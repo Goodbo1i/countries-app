@@ -2,7 +2,7 @@
     <!-- Lentele -->
     <div class="rows">
         <h3>Create Country form</h3>
-        <CreateComponent @on-submit="addCountry" :code="'Phone'" ref="create" />
+        <CreateComponent @on-submit="addCountry" :code="'Phone'" />
 
         <!-- Lenteles Header -->
         <div class="card">
@@ -23,12 +23,12 @@
             v-for="country in countries"
             :key="country.id"
             :place="country"
-            :city="''"
-            ref="country"
+            v-on:reloadlist="getList()"
         >
         </TableComponent>
 
         <!-- Numeracija -->
+
         <nav
             class="pagination is-centered"
             role="navigation"
@@ -42,7 +42,7 @@
                         }"
                         class="pagination-previous"
                         title="This is the first page"
-                        @click="fetchCountries(pagination.prev_page_url)"
+                        @click="getList(pagination.prev_page_url)"
                         >Previous</a
                     >
                 </li>
@@ -58,7 +58,7 @@
                             'is-disabled': !pagination.next_page_url,
                         }"
                         class="pagination-next"
-                        @click="fetchCountries(pagination.next_page_url)"
+                        @click="getList(pagination.next_page_url)"
                         >Next page</a
                     >
                 </li>
@@ -83,26 +83,26 @@ export default {
                 cities_link: "",
             },
             pagination: {},
-            page_url: `https://akademija.teltonika.lt/countries_api/api/countries`,
         };
     },
     created() {
-        this.fetchCountries();
-    },
-    mounted() {
-        console.log(this.$refs.items);
-        this.$refs.create;
+        this.getList();
     },
     methods: {
-        fetchCountries(page_url) {
-            page_url = page_url || this.page_url;
-            fetch(page_url)
-                .then((res) => res.json())
+        getList(page_url) {
+            page_url =
+                page_url ||
+                `https://akademija.teltonika.lt/countries_api/api/countries`;
+            axios
+                .get(page_url)
                 .then((res) => {
-                    this.countries = res.data;
-                    this.makePagination(res.meta, res.links);
+                    console.log(res);
+                    this.countries = res.data.data;
+                    this.makePagination(res.data.meta, res.data.links);
                 })
-                .catch((err) => console.log(err));
+                .catch((err) => {
+                    console.log(err);
+                });
         },
         makePagination(meta, links) {
             let pagination = {
@@ -134,51 +134,6 @@ export default {
                     },
                 }
             );
-        },
-        //     fetch(
-        //         `https://akademija.teltonika.lt/countries_api/api/countries`,
-        //         {
-        //             method: "post",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //             },
-        //             body: JSON.stringify({
-        //                 data: {
-        //                     attributes: {
-        //                         name: countryForm.name,
-        //                         area: countryForm.area,
-        //                         population: countryForm.population,
-        //                         phone_code: countryForm.phoneCode,
-        //                     },
-        //                 },
-        //             }),
-        //         }
-        //     )
-        //         .then((response) => {
-        //             console.log(response);
-        //         })
-        //         .catch((err) => {
-        //             console.log(err);
-        //         });
-        // },
-        deleteCountry(id) {
-            if (confirm("Are You Sure?")) {
-                fetch(
-                    `https://akademija.teltonika.lt/countries_api/api/countries/${id}`,
-                    {
-                        method: "post",
-                    }
-                )
-                    .then((res) => res.json())
-                    .then((data) => {
-                        alert("Article Removed");
-                        this.fetchCountries();
-                    })
-                    .catch((err) => console.log(err));
-            }
-        },
-        editCountry(country) {
-            this.edit;
         },
     },
     components: { TableComponent, CreateComponent },

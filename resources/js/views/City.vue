@@ -22,9 +22,46 @@
             v-for="city in cities"
             :key="city.id"
             :place="city"
-            :city="'cities'"
+            v-on:reloadlist="getListCities()"
         >
         </TableComponent>
+
+        <!-- Numeracija -->
+        <nav
+            class="pagination is-centered"
+            role="navigation"
+            aria-label="pagination"
+        >
+            <ul class="pagination-list">
+                <li>
+                    <a
+                        v-bind:class="{
+                            'is-disabled': !pagination.prev_page_url,
+                        }"
+                        class="pagination-previous"
+                        title="This is the first page"
+                        @click="getListCities(pagination.prev_page_url)"
+                        >Previous</a
+                    >
+                </li>
+                <li class="page-item">
+                    <h1 class="pagination-link" aria-label="Page">
+                        Page {{ pagination.current_page }} of
+                        {{ pagination.last_page }}
+                    </h1>
+                </li>
+                <li>
+                    <a
+                        v-bind:class="{
+                            'is-disabled': !pagination.next_page_url,
+                        }"
+                        class="pagination-next"
+                        @click="getListCities(pagination.next_page_url)"
+                        >Next page</a
+                    >
+                </li>
+            </ul>
+        </nav>
     </div>
 </template>
 
@@ -43,7 +80,7 @@ export default {
     },
     components: { TableComponent, CreateComponent },
     created() {
-        this.fetchCountries();
+        this.getListCities();
     },
     methods: {
         addCity(cityForm) {
@@ -75,18 +112,30 @@ export default {
                     console.log(err);
                 });
         },
-        fetchCountries(page_url) {
+        getListCities(page_url) {
             page_url =
                 page_url ||
                 `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities `;
-            fetch(page_url)
-                .then((res) => res.json())
+            axios
+                .get(page_url)
                 .then((res) => {
-                    this.cities = res.data;
-                    this.makePagination(res.meta, res.links);
+                    this.cities = res.data.data;
+                    this.makePagination(res.data.meta, res.data.links);
                 })
                 .catch((err) => console.log(err));
         },
+        // fetchCities(page_url) {
+        //     page_url =
+        //         page_url ||
+        //         `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities `;
+        //     fetch(page_url)
+        //         .then((res) => res.json())
+        //         .then((res) => {
+        //             this.cities = res.data;
+        //             this.makePagination(res.meta, res.links);
+        //         })
+        //         .catch((err) => console.log(err));
+        // },
         makePagination(meta, links) {
             let pagination = {
                 current_page: meta.current_page,
