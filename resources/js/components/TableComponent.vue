@@ -51,23 +51,30 @@ export default {
 
     methods: {
         fetchPlaces() {
-            alert(
-                `https://akademija.teltonika.lt/countries_api/api/countries/${id}${this.city}`
-            );
-            fetch(
-                `https://akademija.teltonika.lt/countries_api/api/countries/${id}${this.city}`
-            )
-                .then((res) => res.json())
-                .then((res) => {
-                    this.places = res.data;
-                    this.makePagination(res.meta, res.links);
-                })
-                .catch((err) => console.log(err));
+            if (window.location.href == "http://127.0.0.1:8000/#/") {
+                fetch(
+                    `https://akademija.teltonika.lt/countries_api/api/countries`
+                )
+                    .then((res) => res.json())
+                    .then((res) => {
+                        this.places = res.data;
+                    })
+                    .catch((err) => console.log(err));
+            } else
+                fetch(
+                    `https://akademija.teltonika.lt/countries_api/api/countries/${this.place.relationships.country.data.id}/${this.city}`
+                )
+                    .then((res) => res.json())
+                    .then((res) => {
+                        this.places = res.data;
+                    })
+                    .catch((err) => console.log(err));
         },
+
         deletePlace(id) {
             if (confirm("Are You Sure?")) {
                 fetch(
-                    `https://akademija.teltonika.lt/countries_api/api/countries/${id}${this.city}`,
+                    `https://akademija.teltonika.lt/countries_api/api/countries/${this.place.id}${this.city}`,
                     {
                         method: "delete",
                     }
@@ -75,6 +82,7 @@ export default {
                     .then((res) => res.json())
                     .then((data) => {
                         alert("Article Removed");
+                        console.log(window.location.href);
                         this.fetchPlaces();
                     })
                     .catch((err) => console.log(err));
