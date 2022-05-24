@@ -1,7 +1,15 @@
 <template>
     <div class="rows">
-        <h3>Create City</h3>
-        <CreateComponent @on-submit="addCity" :code="'Postal'" />
+        <div class="addPlace">
+            <h1 class="bigName">Cities</h1>
+        </div>
+        <a class="addPlace" @click="isModalVisable = true">
+            <svg class="svg-icon" viewBox="0 -40 60 60">
+                <path
+                    d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10"
+                ></path>
+            </svg>
+        </a>
 
         <!-- Lenteles Header -->
         <div class="card">
@@ -62,10 +70,20 @@
                 </li>
             </ul>
         </nav>
+        <div>
+            <ModalComponent
+                v-show="isModalVisable"
+                @close="closeModal"
+                :place="city"
+                v-on:reloadlist="getListCities()"
+            >
+            </ModalComponent>
+        </div>
     </div>
 </template>
 
 <script>
+import ModalComponent from "../components/ModalComponent.vue";
 import TableComponent from "../components/TableComponent.vue";
 import CreateComponent from "../components/CreateComponent.vue";
 
@@ -74,15 +92,27 @@ export default {
         return {
             id: this.$route.params.id,
             cities: [],
-            city: {},
+            city: {
+                attributes: {
+                    name: "",
+                    area: "",
+                    population: "",
+                    postal_code: "",
+                },
+                type: "cities",
+            },
             pagination: {},
+            isModalVisable: false,
         };
     },
-    components: { TableComponent, CreateComponent },
+    components: { TableComponent, CreateComponent, ModalComponent },
     created() {
         this.getListCities();
     },
     methods: {
+        showModal() {
+            this.$refs.isModalVisable = true;
+        },
         addCity(cityForm) {
             console.log("creating", cityForm);
             console.log(cityForm.name);
@@ -124,18 +154,7 @@ export default {
                 })
                 .catch((err) => console.log(err));
         },
-        // fetchCities(page_url) {
-        //     page_url =
-        //         page_url ||
-        //         `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities `;
-        //     fetch(page_url)
-        //         .then((res) => res.json())
-        //         .then((res) => {
-        //             this.cities = res.data;
-        //             this.makePagination(res.meta, res.links);
-        //         })
-        //         .catch((err) => console.log(err));
-        // },
+
         makePagination(meta, links) {
             let pagination = {
                 current_page: meta.current_page,
@@ -146,6 +165,20 @@ export default {
             };
             this.pagination = pagination;
         },
+        closeModal() {
+            this.isModalVisable = false;
+        },
     },
 };
 </script>
+
+<style>
+.addPlace {
+    display: inline-block;
+    width: 250px;
+    height: 30px;
+}
+h1.bigName {
+    font-size: 100px;
+}
+</style>
