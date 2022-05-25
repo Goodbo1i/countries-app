@@ -1,15 +1,101 @@
 <template>
     <div class="rows">
+        <!-- Pavadinimas -->
+
         <div class="addPlace">
             <h1 class="bigName">Cities</h1>
         </div>
-        <a class="addPlace" @click="isModalVisable = true">
-            <svg class="svg-icon" viewBox="0 -40 60 60">
-                <path
-                    d="M14.613,10c0,0.23-0.188,0.419-0.419,0.419H10.42v3.774c0,0.23-0.189,0.42-0.42,0.42s-0.419-0.189-0.419-0.42v-3.774H5.806c-0.23,0-0.419-0.189-0.419-0.419s0.189-0.419,0.419-0.419h3.775V5.806c0-0.23,0.189-0.419,0.419-0.419s0.42,0.189,0.42,0.419v3.775h3.774C14.425,9.581,14.613,9.77,14.613,10 M17.969,10c0,4.401-3.567,7.969-7.969,7.969c-4.402,0-7.969-3.567-7.969-7.969c0-4.402,3.567-7.969,7.969-7.969C14.401,2.031,17.969,5.598,17.969,10 M17.13,10c0-3.932-3.198-7.13-7.13-7.13S2.87,6.068,2.87,10c0,3.933,3.198,7.13,7.13,7.13S17.13,13.933,17.13,10"
-                ></path>
+        <a class="addPlace">
+            <svg
+                width="64"
+                height="64"
+                viewBox="0 0 64 64"
+                fill="none"
+                @click="isModalVisable = true"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <g filter="url(#filter0_d_0_433)">
+                    <circle cx="32" cy="32" r="22" fill="white" />
+                </g>
+                <line
+                    x1="22.7742"
+                    y1="32.0426"
+                    x2="41.2258"
+                    y2="32.0426"
+                    stroke="#969696"
+                />
+                <line
+                    x1="31.9573"
+                    y1="22.7742"
+                    x2="31.9573"
+                    y2="41.2258"
+                    stroke="#969696"
+                />
+                <defs>
+                    <filter
+                        id="filter0_d_0_433"
+                        x="0"
+                        y="0"
+                        width="64"
+                        height="64"
+                        filterUnits="userSpaceOnUse"
+                        color-interpolation-filters="sRGB"
+                    >
+                        <feFlood
+                            flood-opacity="0"
+                            result="BackgroundImageFix"
+                        />
+                        <feColorMatrix
+                            in="SourceAlpha"
+                            type="matrix"
+                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                            result="hardAlpha"
+                        />
+                        <feOffset />
+                        <feGaussianBlur stdDeviation="5" />
+                        <feColorMatrix
+                            type="matrix"
+                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.1 0"
+                        />
+                        <feBlend
+                            mode="normal"
+                            in2="BackgroundImageFix"
+                            result="effect1_dropShadow_0_433"
+                        />
+                        <feBlend
+                            mode="normal"
+                            in="SourceGraphic"
+                            in2="effect1_dropShadow_0_433"
+                            result="shape"
+                        />
+                    </filter>
+                </defs>
             </svg>
         </a>
+
+        <!-- Paieska -->
+        <div class="field has-addons">
+            <div class="control">
+                <input
+                    class="input"
+                    type="text"
+                    placeholder="Find a city"
+                    v-model="search"
+                    @input="getListCities()"
+                />
+            </div>
+            <div class="control">
+                <a class="button is-info"> Search </a>
+            </div>
+
+            <!-- Datos Filtravimas -->
+            <date-picker
+                v-model="filterDate"
+                valueType="format"
+                placeholder="Date Filter"
+                @change="getListCities()"
+            ></date-picker>
+        </div>
 
         <!-- Lenteles Header -->
         <div class="card">
@@ -71,6 +157,7 @@
             </ul>
         </nav>
         <div>
+            <!-- Modal pasiekimas is pagrindinio ekrano -->
             <ModalComponent
                 v-show="isModalVisable"
                 @close="closeModal"
@@ -86,10 +173,14 @@
 import ModalComponent from "../components/ModalComponent.vue";
 import TableComponent from "../components/TableComponent.vue";
 import CreateComponent from "../components/CreateComponent.vue";
+import DatePicker from "vue2-datepicker";
+import "vue2-datepicker/index.css";
 
 export default {
     data() {
         return {
+            filterDate: "",
+            search: "",
             id: this.$route.params.id,
             cities: [],
             city: {
@@ -105,7 +196,7 @@ export default {
             isModalVisable: false,
         };
     },
-    components: { TableComponent, CreateComponent, ModalComponent },
+    components: { TableComponent, CreateComponent, ModalComponent, DatePicker },
     created() {
         this.getListCities();
     },
@@ -113,46 +204,40 @@ export default {
         showModal() {
             this.$refs.isModalVisable = true;
         },
-        addCity(cityForm) {
-            console.log("creating", cityForm);
-            console.log(cityForm.name);
-            fetch(
-                `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities`,
-                {
-                    method: "post",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        data: {
-                            attributes: {
-                                name: cityForm.name,
-                                area: cityForm.area,
-                                population: cityForm.population,
-                                postal_code: cityForm.phoneCode,
-                            },
-                        },
-                    }),
-                }
-            )
-                .then((response) => {
-                    console.log(response);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        },
+
         getListCities(page_url) {
-            page_url =
-                page_url ||
-                `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities `;
-            axios
-                .get(page_url)
-                .then((res) => {
-                    this.cities = res.data.data;
-                    this.makePagination(res.data.meta, res.data.links);
-                })
-                .catch((err) => console.log(err));
+            if (this.filterDate == null) this.filterDate = ""; //Jeigu data yra pakeiciama i null, kad URL butu tuscias, o ne null
+            if (!page_url) {
+                axios
+                    .get(
+                        `https://akademija.teltonika.lt/countries_api/api/countries/${this.id}/cities` +
+                            `?search=${this.search}` +
+                            `&start_date=${this.filterDate}`
+                    )
+                    .then((res) => {
+                        console.log(res);
+                        this.cities = res.data.data;
+                        this.makePagination(res.data.meta, res.data.links);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            } else {
+                axios
+                    .get(
+                        page_url +
+                            `&search=${this.search}` +
+                            `&start_date=${this.filterDate}`
+                    )
+                    .then((res) => {
+                        console.log(res);
+                        this.cities = res.data.data;
+                        this.makePagination(res.data.meta, res.data.links);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            }
         },
 
         makePagination(meta, links) {
@@ -175,8 +260,6 @@ export default {
 <style>
 .addPlace {
     display: inline-block;
-    width: 250px;
-    height: 30px;
 }
 h1.bigName {
     font-size: 100px;

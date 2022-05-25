@@ -99,7 +99,6 @@ export default {
             this.$emit("close");
         },
         addPlace() {
-            console.log(this.place.attributes);
             if (this.place.type == "cities") {
                 let json = JSON.stringify({
                     data: {
@@ -145,7 +144,6 @@ export default {
             this.$emit("reloadlist");
         },
         updatePlace() {
-            console.log(this.place.attributes);
             if (this.place.type == "cities") {
                 let json = JSON.stringify({
                     data: {
